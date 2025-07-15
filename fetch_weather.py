@@ -4,17 +4,28 @@ from datetime import datetime
 
 API_KEY = '9d87b35ef81c86659aedec4d1b549965'
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
+UNITS = 'metric'
 
-# K2 Base Camp koordinatės ir aukštis
-LAT = 35.83455
-LON = 76.50927
-ELEVATION = 4965           # metrais
-UNITS = 'metric'           # 'metric' (°C), 'imperial' (°F) arba palikti be šio parametro (K)
+# Sąrašas vietovių su pavadinimais, koordinatėmis ir aukščiu
+LOCATIONS = [
+    {
+        'name': 'K2 Base Camp',
+        'lat': 35.83455,
+        'lon': 76.50927,
+        'elev': 4965
+    },
+    {
+        'name': 'K2 Summit',
+        'lat': 35.88250,
+        'lon': 76.51333,
+        'elev': 8611
+    }
+]
 
-def fetch_weather():
+def fetch_weather(lat, lon):
     params = {
-        'lat': LAT,
-        'lon': LON,
+        'lat': lat,
+        'lon': lon,
         'appid': API_KEY,
         'units': UNITS
     }
@@ -22,20 +33,20 @@ def fetch_weather():
     resp.raise_for_status()
     return resp.json()
 
-def parse_data(d):
-    dt = datetime.utcfromtimestamp(d['dt']).strftime('%Y-%m-%d %H:%M:%S')
-    coord = d.get('coord', {})
-    main = d.get('main', {})
-    wind = d.get('wind', {})
-    clouds = d.get('clouds', {})
-    weather = d.get('weather', [{}])[0]
-    rain = d.get('rain', {}).get('1h', 0)
-    snow = d.get('snow', {}).get('1h', 0)
+def parse_data(data, loc):
+    dt = datetime.utcfromtimestamp(data['dt']).strftime('%Y-%m-%d %H:%M:%S')
+    main = data.get('main', {})
+    wind = data.get('wind', {})
+    clouds = data.get('clouds', {})
+    weather = data.get('weather', [{}])[0]
+    rain = data.get('rain', {}).get('1h', 0)
+    snow = data.get('snow', {}).get('1h', 0)
 
     return [
+        loc['name'],
         dt,
-        coord.get('lat',''),
-        coord.get('lon',''),
+        loc['lat'],
+        loc['lon'],
         main.get('temp',''),
         main.get('feels_like',''),
         main.get('temp_min',''),
@@ -49,32 +60,35 @@ def parse_data(d):
         weather.get('description',''),
         rain,
         snow,
-        ELEVATION            # pridedam konstantinį aukštį
+        loc['elev']
     ]
 
-def write_csv(row, filename='weather.csv'):
+def write_csv(rows, filename='weather.csv'):
     header = [
-        'datetime','lat','lon',
+        'location','datetime','lat','lon',
         'temp','feels_like','temp_min','temp_max',
         'pressure','humidity',
         'wind_speed','wind_deg',
         'clouds','weather_main','weather_desc',
         'rain_1h','snow_1h',
-        'elevation_m'         # naujas stulpelis
+        'elevation_m'
     ]
     try:
-        with open(filename,'r',encoding='utf-8'):
+        with open(filename, 'r', encoding='utf-8'):
             exists = True
     except FileNotFoundError:
         exists = False
 
-    with open(filename,'a',newline='',encoding='utf-8') as f:
-        w = csv.writer(f)
+    with open(filename, 'a', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
         if not exists:
-            w.writerow(header)
-        w.writerow(row)
+            writer.writerow(header)
+        writer.writerows(rows)
 
 if __name__ == '__main__':
-    data = fetch_weather()
-    row = parse_data(data)
-    write_csv(row)
+    all_rows = []
+    for loc in LOCATIONS:
+        data = fetch_weather(loc['lat'], loc['lon'])
+        row = parse_data(data, loc)
+        all_rows.append(row)
+    write_csv(all_rows)
