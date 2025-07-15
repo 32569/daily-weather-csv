@@ -1,12 +1,11 @@
 import requests
-import time
 import csv
 from datetime import datetime
 
-API_KEY = '9d87b35ef81c86659aedec4d1b549965'  # <- Tavo OpenWeather API raktas
+API_KEY = '9d87b35ef81c86659aedec4d1b549965'
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-CITY = 'Islamabad,PK'                          # <- Pasirink miestą/kodą pagal poreikį
-UNITS = 'metric'                              # 'metric' (°C), 'imperial' (°F) arba palikti be šio parametro (K)
+CITY = 'Islamabad,PK'
+UNITS = 'metric'
 
 def fetch_weather():
     params = {
@@ -19,7 +18,6 @@ def fetch_weather():
     return response.json()
 
 def parse_data(data):
-    # Konvertuojam UNIX timestamp į atskaitos datą
     dt = datetime.utcfromtimestamp(data['dt']).strftime('%Y-%m-%d %H:%M:%S')
     coord = data.get('coord', {})
     main = data.get('main', {})
@@ -57,17 +55,15 @@ def write_csv(row, filename='weather.csv'):
         'clouds','weather_main','weather_desc',
         'rain_1h','snow_1h'
     ]
-    # Patikrinam, ar failas jau egzistuoja
     try:
         with open(filename, 'r', encoding='utf-8'):
-            file_exists = True
+            exists = True
     except FileNotFoundError:
-        file_exists = False
+        exists = False
 
-    # Atidarom CSV rašymui
     with open(filename, 'a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        if not file_exists:
+        if not exists:
             writer.writerow(header)
         writer.writerow(row)
 
