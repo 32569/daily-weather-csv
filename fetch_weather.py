@@ -4,12 +4,17 @@ from datetime import datetime
 
 API_KEY = '9d87b35ef81c86659aedec4d1b549965'
 BASE_URL = 'https://api.openweathermap.org/data/2.5/weather'
-CITY = 'Islamabad,PK'
-UNITS = 'metric'
+
+# K2 Base Camp koordinatės ir aukštis
+LAT = 35.83455
+LON = 76.50927
+ELEVATION = 4965           # metrais
+UNITS = 'metric'           # 'metric' (°C), 'imperial' (°F) arba palikti be šio parametro (K)
 
 def fetch_weather():
     params = {
-        'q': CITY,
+        'lat': LAT,
+        'lon': LON,
         'appid': API_KEY,
         'units': UNITS
     }
@@ -43,7 +48,8 @@ def parse_data(d):
         weather.get('main',''),
         weather.get('description',''),
         rain,
-        snow
+        snow,
+        ELEVATION            # pridedam konstantinį aukštį
     ]
 
 def write_csv(row, filename='weather.csv'):
@@ -53,7 +59,8 @@ def write_csv(row, filename='weather.csv'):
         'pressure','humidity',
         'wind_speed','wind_deg',
         'clouds','weather_main','weather_desc',
-        'rain_1h','snow_1h'
+        'rain_1h','snow_1h',
+        'elevation_m'         # naujas stulpelis
     ]
     try:
         with open(filename,'r',encoding='utf-8'):
