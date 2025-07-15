@@ -1,40 +1,53 @@
 name: Daily Weather to CSV
 
+# Svarbu – nurodom, kad šiam workflow reikia rašymo teisių
+permissions:
+  contents: write
+
 on:
   schedule:
-    - cron:  '0 7 * * *'   # kasdien 07:00 UTC
-  workflow_dispatch:      # leidžia paleisti rankiniu būdu
+    - cron: '0 7 * * *'     # kasdien 07:00 UTC
+  workflow_dispatch:        # galima ir rankiniu būdu paleisti
 
 jobs:
   fetch-and-commit:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      # 1) checkout – su persist-credentials: true, perduodam GITHUB_TOKEN
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
+      # 2) Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      # 3) Install dependencies
       - name: Install dependencies
         run: |
-          # Įsitikinam, kad yra requirements.txt
           if [ ! -f requirements.txt ]; then
-            echo "❌ requirements.txt nerastas! Patikrink jo vietą."
+            echo "::error ::requirements.txt nerastas!"
             exit 1
           fi
+          pip install --upgrade pip
           pip install -r requirements.txt
 
+      # 4) Vykdome fetch_weather.py
       - name: Fetch weather and append to CSV
         run: python fetch_weather.py
 
+      # 5) Commit & push atnaujintą weather.csv
       - name: Commit & push CSV
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "actions@github.com"
           git add weather.csv
-          git diff --cached --quiet || git commit -m "chore: add daily weather data"
-          git push
+          # Jei yra pakeitimų, commintinam ir pushinam
+          git diff --cached --quiet || git commit -m "chore: add daily weather data" && git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
