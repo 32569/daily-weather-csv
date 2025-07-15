@@ -13,35 +13,35 @@ def fetch_weather():
         'appid': API_KEY,
         'units': UNITS
     }
-    response = requests.get(BASE_URL, params=params)
-    response.raise_for_status()
-    return response.json()
+    resp = requests.get(BASE_URL, params=params)
+    resp.raise_for_status()
+    return resp.json()
 
-def parse_data(data):
-    dt = datetime.utcfromtimestamp(data['dt']).strftime('%Y-%m-%d %H:%M:%S')
-    coord = data.get('coord', {})
-    main = data.get('main', {})
-    wind = data.get('wind', {})
-    clouds = data.get('clouds', {})
-    weather = data.get('weather', [{}])[0]
-    rain = data.get('rain', {}).get('1h', 0)
-    snow = data.get('snow', {}).get('1h', 0)
+def parse_data(d):
+    dt = datetime.utcfromtimestamp(d['dt']).strftime('%Y-%m-%d %H:%M:%S')
+    coord = d.get('coord', {})
+    main = d.get('main', {})
+    wind = d.get('wind', {})
+    clouds = d.get('clouds', {})
+    weather = d.get('weather', [{}])[0]
+    rain = d.get('rain', {}).get('1h', 0)
+    snow = d.get('snow', {}).get('1h', 0)
 
     return [
         dt,
-        coord.get('lat', ''),
-        coord.get('lon', ''),
-        main.get('temp', ''),
-        main.get('feels_like', ''),
-        main.get('temp_min', ''),
-        main.get('temp_max', ''),
-        main.get('pressure', ''),
-        main.get('humidity', ''),
-        wind.get('speed', ''),
-        wind.get('deg', ''),
-        clouds.get('all', ''),
-        weather.get('main', ''),
-        weather.get('description', ''),
+        coord.get('lat',''),
+        coord.get('lon',''),
+        main.get('temp',''),
+        main.get('feels_like',''),
+        main.get('temp_min',''),
+        main.get('temp_max',''),
+        main.get('pressure',''),
+        main.get('humidity',''),
+        wind.get('speed',''),
+        wind.get('deg',''),
+        clouds.get('all',''),
+        weather.get('main',''),
+        weather.get('description',''),
         rain,
         snow
     ]
@@ -56,16 +56,16 @@ def write_csv(row, filename='weather.csv'):
         'rain_1h','snow_1h'
     ]
     try:
-        with open(filename, 'r', encoding='utf-8'):
+        with open(filename,'r',encoding='utf-8'):
             exists = True
     except FileNotFoundError:
         exists = False
 
-    with open(filename, 'a', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
+    with open(filename,'a',newline='',encoding='utf-8') as f:
+        w = csv.writer(f)
         if not exists:
-            writer.writerow(header)
-        writer.writerow(row)
+            w.writerow(header)
+        w.writerow(row)
 
 if __name__ == '__main__':
     data = fetch_weather()
