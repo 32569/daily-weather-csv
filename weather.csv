@@ -1,3 +1,5 @@
 location,datetime,lat,lon,temp,feels_like,temp_min,temp_max,pressure,humidity,wind_speed,wind_deg,clouds,weather_main,weather_desc,rain_1h,snow_1h,elevation_m
 K2 Base Camp,2025-07-15 17:47:52,35.83455,76.50927,1.12,-1.83,1.12,1.12,1016,88,2.64,203,94,Clouds,overcast clouds,0,0,4965
 K2 Summit,2025-07-15 17:47:52,35.8825,76.51333,-15.7,-22.13,-15.7,-15.7,1015,82,2.84,201,89,Clouds,overcast clouds,0,0,8611
+K2 Base Camp,2025-07-16 16:26:20,35.83455,76.50927,1.1,-1.01,1.1,1.1,1018,99,1.87,200,100,Snow,snow,0,0.63,4965
+K2 Summit,2025-07-16 16:26:20,35.8825,76.51333,-16.24,-20.68,-16.24,-16.24,1018,98,1.67,206,100,Snow,snow,0,0.57,8611
